@@ -1,15 +1,8 @@
 ﻿using CuaHangMayTinh.Controllers;
 using CuaHangMayTinh.Models;
-using Microsoft.Data.SqlClient;
-using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CuaHangMayTinh.Views.Report
@@ -21,177 +14,139 @@ namespace CuaHangMayTinh.Views.Report
             InitializeComponent();
         }
 
-        private int maDM;
-        private string titleWb, titleWs;
-
         private void frmInventoryReport_Load(object sender, EventArgs e)
         {
-            // TODO: This line of code loads data into the 'cuaHangMayTinhDataSet.DanhMuc' table. You can move, or remove it, as needed.
-            this.danhMucTableAdapter.Fill(this.cuaHangMayTinhDataSet.DanhMuc);
-            loadComboboxCategory();
+            LoadCategories();
             LoadData();
 
+            // Gán sự kiện
+            btnViewReport.Click += btnViewReport_Click;
+            buttonClear.Click += buttonClear_Click;
+            btnExport.Click += btnExport_Click;
+        }
+
+        private void LoadCategories()
+        {
+            try
+            {
+                var categories = CategoryController.Instance.GetAllCategories();
+                cbCategory.DataSource = categories;
+                cbCategory.DisplayMember = "TenDanhMuc";
+                cbCategory.ValueMember = "MaDanhMuc";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tải danh mục: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void LoadData()
         {
+            try
+            {
+                int? categoryId = null;
+                if (cbCategory.SelectedValue != null && cbCategory.SelectedValue is int selectedId)
+                {
+                    categoryId = selectedId;
+                }
 
-            int total = int.Parse(ProductController.Instance.GetTotalProduct().ToString());
-            int outStock = int.Parse(ProductController.Instance.GetOutOfStockProduct().ToString());
-            int lowStock = int.Parse(ProductController.Instance.GetLowStockProduct().ToString());
-            lblTotalProducts.Text = total.ToString();
-            lblOutOfStock.Text = outStock.ToString();
-            lblLowStock.Text = lowStock.ToString();
-            ProductController.Instance.LoadProduct(dataGridViewProduct);
+                int? minStock = null;
+                if (!string.IsNullOrEmpty(txtMinStock.Text) && int.TryParse(txtMinStock.Text, out int min))
+                {
+                    minStock = min;
+                }
+
+                int? maxStock = null;
+                if (!string.IsNullOrEmpty(txtMaxStock.Text) && int.TryParse(txtMaxStock.Text, out int max))
+                {
+                    maxStock = max;
+                }
+
+                var request = new ReportModel
+                {
+                    ReportType = 1, // Inventory
+                    CategoryId = categoryId,
+                    MinStock = minStock,
+                    MaxStock = maxStock
+                };
+
+                var result = ReportController.Instance.GenerateReport(request);
+                BindInventoryData(result);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
-        private void loadComboboxCategory()
+        private void BindInventoryData(ReportModel report)
         {
-            List<Category> listCategories = new List<Category>();
+            var data = report.ReportData as List<InventoryReportItem>;
 
-            listCategories = CategoryController.Instance.GetCategory();
+            // Tạo DataTable để hiển thị
+            var dt = new DataTable();
+            dt.Columns.Add("Mã SP", typeof(int));
+            dt.Columns.Add("Tên SP", typeof(string));
+            dt.Columns.Add("Danh mục", typeof(string));
+            dt.Columns.Add("Nhà cung cấp", typeof(string));
+            dt.Columns.Add("Số lượng tồn", typeof(int));
+            dt.Columns.Add("Giá bán", typeof(string));
+            dt.Columns.Add("Giá nhập", typeof(string));
+            dt.Columns.Add("Tổng giá trị", typeof(string));
+            dt.Columns.Add("Trạng thái", typeof(string));
 
-            cbCategory.DataSource = listCategories;
-
-            //cbCategory.DisplayMember = "Name";
-
-            //CategoryController.Instance.FillCategoryComboBox(script, comboBoxLoaiSP);
-        }
-
-        private void cbCategory_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            ComboBox cb = sender as ComboBox;
-
-            if (cb.SelectedItem == null)
+            if (data == null || data.Count == 0)
             {
-                return;
+                // Thêm dòng thông báo không có dữ liệu
+                dt.Rows.Add(0, "Chưa có dữ liệu", "", "", 0, "0 đ", "0 đ", "0 đ", "");
+            }
+            else
+            {
+                foreach (var item in data)
+                {
+                    dt.Rows.Add(
+                        item.MaSP,
+                        item.TenSP,
+                        item.TenDanhMuc,
+                        item.TenNCC,
+                        item.SoLuongTon,
+                        item.GiaBan.ToString("N0") + " đ",
+                        item.GiaNhap.ToString("N0") + " đ",
+                        item.TongGiaTriTonKho.ToString("N0") + " đ",
+                        item.TrangThaiTonKho
+                    );
+                }
             }
 
-            Category selected = cb.SelectedItem as Category;
+            dataGridViewProduct.DataSource = dt;
 
-            if (selected != null)
-            {
-                maDM = selected.MaDanhMuc;
-                titleWb = selected.TenDanhMuc;
-            }
+            // Cập nhật tổng quan
+            lblTotalProducts.Text = report.TotalProducts.ToString();
+            lblOutOfStock.Text = report.OutOfStockCount.ToString();
+            lblLowStock.Text = report.LowStockCount.ToString();
         }
 
         private void btnViewReport_Click(object sender, EventArgs e)
         {
-
-            int minStock;
-            int maxStock;
-
-            if (txtMinStock.Text.IsNullOrEmpty() || txtMaxStock.Text.IsNullOrEmpty())
-            {
-                //MessageBox.Show("Hãy điền giới hạn số lượng tồn!!");
-                //return;
-                if (maDM == 16)
-                {
-                    try
-                    {
-                        ProductController.Instance.LoadProduct(dataGridViewProduct);
-                    }
-                    catch (SqlException ex)
-                    {
-                        throw ex;
-                    }
-                }
-                else
-                {
-                    try
-                    {
-                        ProductController.Instance.LoadProductByIDCategory(dataGridViewProduct, maDM);
-                    }
-                    catch (SqlException ex)
-                    {
-                        throw ex;
-                    }
-                }
-
-            }
-            else
-            {
-                minStock = (int)Convert.ToDouble(txtMinStock.Text.ToString());
-                maxStock = (int)Convert.ToDouble(txtMaxStock.Text.ToString());
-                if (maDM == 16)
-                {
-                    try
-                    {
-                        ProductController.Instance.LoadProductOnlyStock(dataGridViewProduct, minStock, maxStock);
-                    }
-                    catch (SqlException ex)
-                    {
-                        throw ex;
-                    }
-                }
-                else
-                {
-                    try
-                    {
-                        ProductController.Instance.LoadProductByIDCategoryAndStock(dataGridViewProduct, maDM, minStock, maxStock);
-                    }
-                    catch (SqlException ex)
-                    {
-                        throw ex;
-                    }
-                }
-
-            }
+            LoadData();
         }
 
         private void buttonClear_Click(object sender, EventArgs e)
         {
-            try
-            {
-                ProductController.Instance.LoadProduct(dataGridViewProduct);
-            }
-            catch (SqlException ex)
-            {
-                throw ex;
-            }
-        }
-
-        private void buttonSearchAll_Click(object sender, EventArgs e)
-        {
-            int minStock;
-            int maxStock;
-
-            if (txtMinStock.Text.IsNullOrEmpty() || txtMaxStock.Text.IsNullOrEmpty())
-            {
-                MessageBox.Show("Hãy điền giới hạn số lượng tồn!!");
-                return;
-            }
-            else
-            {
-                minStock = (int)Convert.ToDouble(txtMinStock.Text.ToString());
-                maxStock = (int)Convert.ToDouble(txtMaxStock.Text.ToString());
-                try
-                {
-                    ProductController.Instance.LoadProductByIDCategoryAndStock(dataGridViewProduct, maDM, minStock, maxStock);
-                }
-                catch (SqlException ex)
-                {
-                    throw ex;
-                }
-            }
-
-
+            txtMinStock.Text = "";
+            txtMaxStock.Text = "";
+            LoadData();
         }
 
         private void btnExport_Click(object sender, EventArgs e)
         {
-            try
-            {
-                //ExcelController.Instance.SaveExcel(dgvInventory, "titleWb", "Inventory");
-                ExcelController.Instance.SaveExcel(dataGridViewProduct, titleWb, "Inventory");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            MessageBox.Show("Chức năng xuất Excel tạm thời chưa hỗ trợ.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-
+        private void cbCategory_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Có thể load lại data khi đổi danh mục
+            LoadData();
+        }
     }
 }

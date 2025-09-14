@@ -217,16 +217,7 @@
             // 
             // formToolStripMenuItem
             // 
-            this.formToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.FormTest,
-            this.frmCustomerManagement,
-            this.FormTestSanPham});
-            this.formToolStripMenuItem.Name = "formToolStripMenuItem";
-            this.formToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
-            this.formToolStripMenuItem.Text = "Form";
-            this.formToolStripMenuItem.DropDownItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.formToolStripMenuItem_DropDownItemClicked);
-            this.formToolStripMenuItem.Click += new System.EventHandler(this.formToolStripMenuItem_Click);
-            // 
+            
             // FormTest
             // 
             this.FormTest.Name = "FormTest";

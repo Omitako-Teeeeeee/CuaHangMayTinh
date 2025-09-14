@@ -8,19 +8,33 @@ namespace CuaHangMayTinh.Controllers
     public class ReportController
     {
         private static ReportController instance;
-        public static ReportController Instance => instance ?? (instance = new ReportController());
+        public static ReportController Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new ReportController();
+                }
+                return instance;
+            }
+        }
 
         public ReportModel GenerateReport(ReportModel reportRequest)
         {
             try
             {
-                return reportRequest.ReportType switch
+                switch (reportRequest.ReportType)
                 {
-                    1 => GenerateInventoryReport(reportRequest),
-                    2 => GenerateBestSellersReport(reportRequest),
-                    3 => GenerateRevenueReport(reportRequest),
-                    _ => throw new ArgumentException("Loại báo cáo không hợp lệ")
-                };
+                    case 1:
+                        return GenerateInventoryReport(reportRequest);
+                    case 2:
+                        return GenerateBestSellersReport(reportRequest);
+                    case 3:
+                        return GenerateRevenueReport(reportRequest);
+                    default:
+                        throw new ArgumentException("Loại báo cáo không hợp lệ");
+                }
             }
             catch (Exception ex)
             {
@@ -49,8 +63,12 @@ namespace CuaHangMayTinh.Controllers
                 AND sp.SoLuongTon BETWEEN @MinStock AND @MaxStock
                 ORDER BY sp.SoLuongTon ASC";
 
+            int categoryId = request.CategoryId ?? 0;
+            int minStock = request.MinStock ?? 0;
+            int maxStock = request.MaxStock ?? int.MaxValue;
+
             DataTable data = DataProvider.Instance.ExecuteQuery(query,
-                new object[] { request.CategoryId ?? 0, request.MinStock ?? 0, request.MaxStock ?? int.MaxValue });
+                new object[] { categoryId, minStock, maxStock });
 
             var inventoryItems = new List<InventoryReportItem>();
             foreach (DataRow row in data.Rows)
@@ -70,13 +88,36 @@ namespace CuaHangMayTinh.Controllers
             }
 
             // Cập nhật thông tin tổng quan
-            request.TotalProducts = inventoryItems.Count;
-            request.OutOfStockCount = inventoryItems.FindAll(x => x.SoLuongTon == 0).Count;
-            request.LowStockCount = inventoryItems.FindAll(x => x.SoLuongTon > 0 && x.SoLuongTon <= 10).Count;
-            request.TotalInventoryValue = CalculateTotalInventoryValue(inventoryItems);
+            UpdateInventorySummary(request, inventoryItems);
 
             request.ReportData = inventoryItems;
             return request;
+        }
+
+        /// <summary>
+        /// Cập nhật thống kê tổng quan cho báo cáo tồn kho
+        /// </summary>
+        private void UpdateInventorySummary(ReportModel request, List<InventoryReportItem> inventoryItems)
+        {
+            request.TotalProducts = inventoryItems.Count;
+
+            int outOfStockCount = 0;
+            int lowStockCount = 0;
+            foreach (var item in inventoryItems)
+            {
+                if (item.SoLuongTon == 0)
+                {
+                    outOfStockCount++;
+                }
+                else if (item.SoLuongTon > 0 && item.SoLuongTon <= 10)
+                {
+                    lowStockCount++;
+                }
+            }
+
+            request.OutOfStockCount = outOfStockCount;
+            request.LowStockCount = lowStockCount;
+            request.TotalInventoryValue = CalculateTotalInventoryValue(inventoryItems);
         }
 
         private decimal CalculateTotalInventoryValue(List<InventoryReportItem> items)
@@ -91,6 +132,16 @@ namespace CuaHangMayTinh.Controllers
 
         private ReportModel GenerateBestSellersReport(ReportModel request)
         {
+            string orderByClause;
+            if (request.SortBy == "Quantity")
+            {
+                orderByClause = "SUM(ct.SoLuong)";
+            }
+            else
+            {
+                orderByClause = "SUM(ct.ThanhTien)";
+            }
+
             string query = @"
                 SELECT TOP (@TopCount)
                     sp.MaSP, sp.TenSP, dm.TenDanhMuc,
@@ -105,7 +156,7 @@ namespace CuaHangMayTinh.Controllers
                 WHERE dh.NgayDatHang BETWEEN @FromDate AND @ToDate
                 AND dh.TrangThai = 2
                 GROUP BY sp.MaSP, sp.TenSP, dm.TenDanhMuc
-                ORDER BY " + (request.SortBy == "Quantity" ? "SUM(ct.SoLuong)" : "SUM(ct.ThanhTien)") + " DESC";
+                ORDER BY " + orderByClause + " DESC";
 
             DataTable data = DataProvider.Instance.ExecuteQuery(query,
                 new object[] { request.TopCount, request.FromDate, request.ToDate });
@@ -131,14 +182,25 @@ namespace CuaHangMayTinh.Controllers
 
         private ReportModel GenerateRevenueReport(ReportModel request)
         {
-            string query = request.GroupBy switch
+            string query;
+            switch (request.GroupBy)
             {
-                "Day" => GetDailyRevenueQuery(),
-                "Month" => GetMonthlyRevenueQuery(),
-                "Quarter" => GetQuarterlyRevenueQuery(),
-                "Year" => GetYearlyRevenueQuery(),
-                _ => GetMonthlyRevenueQuery()
-            };
+                case "Day":
+                    query = GetDailyRevenueQuery();
+                    break;
+                case "Month":
+                    query = GetMonthlyRevenueQuery();
+                    break;
+                case "Quarter":
+                    query = GetQuarterlyRevenueQuery();
+                    break;
+                case "Year":
+                    query = GetYearlyRevenueQuery();
+                    break;
+                default:
+                    query = GetMonthlyRevenueQuery();
+                    break;
+            }
 
             DataTable data = DataProvider.Instance.ExecuteQuery(query,
                 new object[] { request.FromDate, request.ToDate });
@@ -159,10 +221,29 @@ namespace CuaHangMayTinh.Controllers
             }
 
             // Cập nhật tổng quan
-            UpdateRevenueSummary(request, revenueData);
+            UpdateRevenueStatistics(request, revenueData);
 
             request.ReportData = revenueData;
             return request;
+        }
+
+        private string GetDailyRevenueQuery()
+        {
+            return @"
+                SELECT 
+                    CONVERT(varchar, dh.NgayDatHang, 103) as Period,
+                    COUNT(dh.MaDH) as SoHoaDon,
+                    SUM(dh.TongTien) as TongDoanhThu,
+                    SUM(dh.TongThanhToan) as TongThanhToan,
+                    AVG(dh.TongTien) as TrungBinhHoaDon,
+                    SUM(ct.SoLuong) as TongSoLuongBan,
+                    COUNT(DISTINCT dh.MaKH) as SoKhachHang
+                FROM DonHang dh
+                INNER JOIN ChiTietDonHang ct ON dh.MaDH = ct.MaDH
+                WHERE dh.NgayDatHang BETWEEN @FromDate AND @ToDate
+                AND dh.TrangThai = 2
+                GROUP BY dh.NgayDatHang
+                ORDER BY dh.NgayDatHang";
         }
 
         private string GetMonthlyRevenueQuery()
@@ -184,7 +265,48 @@ namespace CuaHangMayTinh.Controllers
                 ORDER BY YEAR(dh.NgayDatHang), MONTH(dh.NgayDatHang)";
         }
 
-        private void UpdateRevenueSummary(ReportModel request, List<RevenueReportItem> revenueData)
+        private string GetQuarterlyRevenueQuery()
+        {
+            return @"
+                SELECT 
+                    CONCAT('Q', DATEPART(QUARTER, dh.NgayDatHang), '/', YEAR(dh.NgayDatHang)) as Period,
+                    COUNT(dh.MaDH) as SoHoaDon,
+                    SUM(dh.TongTien) as TongDoanhThu,
+                    SUM(dh.TongThanhToan) as TongThanhToan,
+                    AVG(dh.TongTien) as TrungBinhHoaDon,
+                    SUM(ct.SoLuong) as TongSoLuongBan,
+                    COUNT(DISTINCT dh.MaKH) as SoKhachHang
+                FROM DonHang dh
+                INNER JOIN ChiTietDonHang ct ON dh.MaDH = ct.MaDH
+                WHERE dh.NgayDatHang BETWEEN @FromDate AND @ToDate
+                AND dh.TrangThai = 2
+                GROUP BY YEAR(dh.NgayDatHang), DATEPART(QUARTER, dh.NgayDatHang)
+                ORDER BY YEAR(dh.NgayDatHang), DATEPART(QUARTER, dh.NgayDatHang)";
+        }
+
+        private string GetYearlyRevenueQuery()
+        {
+            return @"
+                SELECT 
+                    CONCAT(YEAR(dh.NgayDatHang)) as Period,
+                    COUNT(dh.MaDH) as SoHoaDon,
+                    SUM(dh.TongTien) as TongDoanhThu,
+                    SUM(dh.TongThanhToan) as TongThanhToan,
+                    AVG(dh.TongTien) as TrungBinhHoaDon,
+                    SUM(ct.SoLuong) as TongSoLuongBan,
+                    COUNT(DISTINCT dh.MaKH) as SoKhachHang
+                FROM DonHang dh
+                INNER JOIN ChiTietDonHang ct ON dh.MaDH = ct.MaDH
+                WHERE dh.NgayDatHang BETWEEN @FromDate AND @ToDate
+                AND dh.TrangThai = 2
+                GROUP BY YEAR(dh.NgayDatHang)
+                ORDER BY YEAR(dh.NgayDatHang)";
+        }
+
+        /// <summary>
+        /// Cập nhật thống kê tổng quan cho báo cáo doanh thu
+        /// </summary>
+        private void UpdateRevenueStatistics(ReportModel request, List<RevenueReportItem> revenueData)
         {
             request.TotalInvoices = 0;
             request.TotalRevenue = 0;
@@ -201,9 +323,14 @@ namespace CuaHangMayTinh.Controllers
                 request.TotalCustomers += item.SoKhachHang;
             }
 
-            request.AverageInvoiceValue = request.TotalInvoices > 0
-                ? request.TotalRevenue / request.TotalInvoices
-                : 0;
+            if (request.TotalInvoices > 0)
+            {
+                request.AverageInvoiceValue = request.TotalRevenue / request.TotalInvoices;
+            }
+            else
+            {
+                request.AverageInvoiceValue = 0;
+            }
         }
     }
 }

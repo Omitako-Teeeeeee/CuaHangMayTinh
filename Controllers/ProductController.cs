@@ -9,79 +9,113 @@ namespace CuaHangMayTinh.Controllers
     public class ProductController
     {
         private static ProductController instance;
-        public static ProductController Instance => instance ?? (instance = new ProductController());
+
+        public static ProductController Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new ProductController();
+                }
+                return instance;
+            }
+            private set
+            {
+                instance = value;
+            }
+        }
 
         private ProductController() { }
 
+        private string script = @"";
+
         #region BASIC CRUD OPERATIONS
 
-        public List<Product> GetAllProducts()
+        public List<Product> GetProduct()
         {
+            List<Product> list = new List<Product>();
+
             try
             {
-                string script = @"EXEC usp_GetSanPham";
+                script = @"EXEC usp_GetSanPham";
                 DataTable dt = DataProvider.Instance.ExecuteQuery(script);
-                return ConvertDataTableToList(dt);
+
+                foreach (DataRow item in dt.Rows)
+                {
+                    Product product = new Product(item);
+                    list.Add(product);
+                }
             }
             catch (Exception ex)
             {
-                throw new ApplicationException("Lỗi khi lấy danh sách sản phẩm", ex);
+                MessageBox.Show("Lỗi khi lấy danh sách sản phẩm: " + ex.Message);
             }
+
+            return list;
         }
 
         public Product GetProductById(int productId)
         {
             try
             {
-                string script = @"EXEC usp_GetSanPhamByID @MaSP";
+                script = @"EXEC usp_GetSanPhamByID @MaSP";
                 DataTable dt = DataProvider.Instance.ExecuteQuery(script, new object[] { productId });
-                return dt.Rows.Count > 0 ? new Product(dt.Rows[0]) : null;
+
+                if (dt.Rows.Count > 0)
+                {
+                    return new Product(dt.Rows[0]);
+                }
+                return null;
             }
             catch (Exception ex)
             {
-                throw new ApplicationException($"Lỗi khi lấy sản phẩm ID {productId}", ex);
+                MessageBox.Show($"Lỗi khi lấy sản phẩm ID {productId}: " + ex.Message);
+                return null;
             }
         }
 
-        public bool AddProduct(Product product)
+        public bool AddProduct(string tenSP, int maDanhMuc, int maNCC, string moTa,
+                             int baoHanh, decimal giaNhap, decimal giaBan, int soLuongTon)
         {
             try
             {
-                string script = @"EXEC usp_AddSanPham @TenSP, @MaDanhMuc, @MaNCC, @MoTa, 
-                                @BaoHanh, @GiaNhap, @GiaBan, @SoLuongTon";
+                script = @"EXEC usp_AddSanPham @TenSP, @MaDanhMuc, @MaNCC, @MoTa, 
+                         @BaoHanh, @GiaNhap, @GiaBan, @SoLuongTon";
 
                 int result = DataProvider.Instance.ExecuteNonQuery(script, new object[]
                 {
-                    product.TenSP, product.MaDanhMuc, product.MaNCC, product.MoTa,
-                    product.BaoHanh, product.GiaNhap, product.GiaBan, product.SoLuongTon
+                    tenSP, maDanhMuc, maNCC, moTa, baoHanh, giaNhap, giaBan, soLuongTon
                 });
 
                 return result > 0;
             }
             catch (Exception ex)
             {
-                throw new ApplicationException("Lỗi khi thêm sản phẩm", ex);
+                MessageBox.Show("Lỗi khi thêm sản phẩm: " + ex.Message);
+                return false;
             }
         }
 
-        public bool UpdateProduct(Product product)
+        public bool UpdateProduct(int maSP, string tenSP, int maDanhMuc, int maNCC, string moTa,
+                                int baoHanh, decimal giaNhap, decimal giaBan, int soLuongTon)
         {
             try
             {
-                string script = @"EXEC usp_UpdateSanPham @MaSP, @TenSP, @MaDanhMuc, @MaNCC, 
-                                @MoTa, @BaoHanh, @GiaNhap, @GiaBan, @SoLuongTon";
+                script = @"EXEC usp_UpdateSanPham @MaSP, @TenSP, @MaDanhMuc, @MaNCC, 
+                         @MoTa, @BaoHanh, @GiaNhap, @GiaBan, @SoLuongTon";
 
                 int result = DataProvider.Instance.ExecuteNonQuery(script, new object[]
                 {
-                    product.MaSP, product.TenSP, product.MaDanhMuc, product.MaNCC, product.MoTa,
-                    product.BaoHanh, product.GiaNhap, product.GiaBan, product.SoLuongTon
+                    maSP, tenSP, maDanhMuc, maNCC, moTa, baoHanh, giaNhap, giaBan, soLuongTon
                 });
 
                 return result > 0;
             }
             catch (Exception ex)
             {
-                throw new ApplicationException($"Lỗi khi cập nhật sản phẩm ID {product.MaSP}", ex);
+                MessageBox.Show($"Lỗi khi cập nhật sản phẩm ID {maSP}: " + ex.Message);
+                return false;
             }
         }
 
@@ -89,13 +123,14 @@ namespace CuaHangMayTinh.Controllers
         {
             try
             {
-                string script = @"EXEC usp_DeleteSanPham @MaSP";
+                script = @"EXEC usp_DeleteSanPham @MaSP";
                 int result = DataProvider.Instance.ExecuteNonQuery(script, new object[] { productId });
                 return result > 0;
             }
             catch (Exception ex)
             {
-                throw new ApplicationException($"Lỗi khi xóa sản phẩm ID {productId}", ex);
+                MessageBox.Show($"Lỗi khi xóa sản phẩm ID {productId}: " + ex.Message);
+                return false;
             }
         }
 
@@ -103,42 +138,45 @@ namespace CuaHangMayTinh.Controllers
 
         #region INVENTORY MANAGEMENT
 
-        public int GetTotalProductCount()
+        public int GetTotalProduct()
         {
             try
             {
-                string script = @"EXEC usp_CountSanPham";
+                script = @"EXEC usp_CountSanPham";
                 return Convert.ToInt32(DataProvider.Instance.ExecuteScalar(script));
             }
             catch (Exception ex)
             {
-                throw new ApplicationException("Lỗi khi đếm tổng sản phẩm", ex);
+                MessageBox.Show("Lỗi khi đếm tổng sản phẩm: " + ex.Message);
+                return 0;
             }
         }
 
-        public int GetOutOfStockCount()
+        public int GetOutOfStockProduct()
         {
             try
             {
-                string script = @"EXEC usp_CountSanPhamHetHang";
+                script = @"EXEC usp_CountSanPhamHetHang";
                 return Convert.ToInt32(DataProvider.Instance.ExecuteScalar(script));
             }
             catch (Exception ex)
             {
-                throw new ApplicationException("Lỗi khi đếm sản phẩm hết hàng", ex);
+                MessageBox.Show("Lỗi khi đếm sản phẩm hết hàng: " + ex.Message);
+                return 0;
             }
         }
 
-        public int GetLowStockCount(int threshold = 5)
+        public int GetLowStockProduct(int threshold = 5)
         {
             try
             {
-                string script = @"EXEC usp_CountSanPhamSapHetHang @SoLuongTon";
+                script = @"EXEC usp_CountSanPhamSapHetHang @SoLuongTon";
                 return Convert.ToInt32(DataProvider.Instance.ExecuteScalar(script, new object[] { threshold }));
             }
             catch (Exception ex)
             {
-                throw new ApplicationException("Lỗi khi đếm sản phẩm sắp hết hàng", ex);
+                MessageBox.Show("Lỗi khi đếm sản phẩm sắp hết hàng: " + ex.Message);
+                return 0;
             }
         }
 
@@ -146,13 +184,14 @@ namespace CuaHangMayTinh.Controllers
         {
             try
             {
-                string script = @"EXEC usp_UpdateProductStock @MaSP, @SoLuongTon";
+                script = @"EXEC usp_UpdateProductStock @MaSP, @SoLuongTon";
                 int result = DataProvider.Instance.ExecuteNonQuery(script, new object[] { productId, quantity });
                 return result > 0;
             }
             catch (Exception ex)
             {
-                throw new ApplicationException($"Lỗi khi cập nhật tồn kho sản phẩm ID {productId}", ex);
+                MessageBox.Show($"Lỗi khi cập nhật tồn kho sản phẩm ID {productId}: " + ex.Message);
+                return false;
             }
         }
 
@@ -162,90 +201,165 @@ namespace CuaHangMayTinh.Controllers
 
         public List<Product> GetProductsByCategory(int categoryId)
         {
+            List<Product> list = new List<Product>();
+
             try
             {
-                string script = @"EXEC usp_GetSanPhamByMaDanhMuc @MaDanhMuc";
+                script = @"EXEC usp_GetSanPhamByMaDanhMuc @MaDanhMuc";
                 DataTable dt = DataProvider.Instance.ExecuteQuery(script, new object[] { categoryId });
-                return ConvertDataTableToList(dt);
+
+                foreach (DataRow item in dt.Rows)
+                {
+                    Product product = new Product(item);
+                    list.Add(product);
+                }
             }
             catch (Exception ex)
             {
-                throw new ApplicationException($"Lỗi khi lấy sản phẩm theo danh mục {categoryId}", ex);
+                MessageBox.Show($"Lỗi khi lấy sản phẩm theo danh mục {categoryId}: " + ex.Message);
             }
+
+            return list;
         }
 
         public List<Product> GetProductsByStockRange(int minStock, int maxStock)
         {
+            List<Product> list = new List<Product>();
+
             try
             {
-                string script = @"EXEC usp_GetSanPhamByStockRange @MinStock, @MaxStock";
+                script = @"EXEC usp_GetSanPhamByStockRange @MinStock, @MaxStock";
                 DataTable dt = DataProvider.Instance.ExecuteQuery(script, new object[] { minStock, maxStock });
-                return ConvertDataTableToList(dt);
+
+                foreach (DataRow item in dt.Rows)
+                {
+                    Product product = new Product(item);
+                    list.Add(product);
+                }
             }
             catch (Exception ex)
             {
-                throw new ApplicationException("Lỗi khi lấy sản phẩm theo khoảng tồn kho", ex);
+                MessageBox.Show("Lỗi khi lấy sản phẩm theo khoảng tồn kho: " + ex.Message);
             }
+
+            return list;
         }
 
         public List<Product> SearchProducts(string keyword)
         {
+            List<Product> list = new List<Product>();
+
             try
             {
-                string script = @"EXEC usp_SearchProduct @Keyword";
-                DataTable dt = DataProvider.Instance.ExecuteQuery(script, new object[] { $"%{keyword}%" });
-                return ConvertDataTableToList(dt);
+                script = @"EXEC usp_SearchProduct @Keyword";
+                DataTable dt = DataProvider.Instance.ExecuteQuery(script, new object[] { "%" + keyword + "%" });
+
+                foreach (DataRow item in dt.Rows)
+                {
+                    Product product = new Product(item);
+                    list.Add(product);
+                }
             }
             catch (Exception ex)
             {
-                throw new ApplicationException("Lỗi khi tìm kiếm sản phẩm", ex);
+                MessageBox.Show("Lỗi khi tìm kiếm sản phẩm: " + ex.Message);
             }
+
+            return list;
         }
 
         #endregion
 
         #region DATA BINDING
 
-        public void BindProductsToGrid(DataGridView dataGridView)
+        public void LoadProduct(DataGridView dataGridViewName)
         {
             try
             {
-                dataGridView.DataSource = GetAllProducts();
+                script = @"EXEC usp_GetSanPham";
+                dataGridViewName.DataSource = DataProvider.Instance.ExecuteQuery(script);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi",
-                              MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi khi tải dữ liệu sản phẩm: " + ex.Message);
             }
         }
 
-        public void BindProductsToGridByCategory(DataGridView dataGridView, int categoryId)
+        public void LoadProductByIDCategory(DataGridView dataGridViewName, int categoryId)
         {
             try
             {
-                dataGridView.DataSource = GetProductsByCategory(categoryId);
+                script = @"EXEC usp_GetSanPhamByMaDanhMuc @MaDanhMuc";
+                dataGridViewName.DataSource = DataProvider.Instance.ExecuteQuery(script, new object[] { categoryId });
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi",
-                              MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi khi tải dữ liệu sản phẩm theo danh mục: " + ex.Message);
+            }
+        }
+
+        public void LoadProductOnlyStock(DataGridView dataGridViewName, int minStock, int maxStock)
+        {
+            try
+            {
+                script = @"EXEC usp_GetSanPhamByStockRange @MinStock, @MaxStock";
+                dataGridViewName.DataSource = DataProvider.Instance.ExecuteQuery(script, new object[] { minStock, maxStock });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi tải dữ liệu sản phẩm theo khoảng tồn: " + ex.Message);
+            }
+        }
+
+        public void LoadProductByIDCategoryAndStock(DataGridView dataGridViewName, int categoryId, int minStock, int maxStock)
+        {
+            try
+            {
+                script = @"EXEC usp_GetSanPhamByCategoryAndStock @MaDanhMuc, @MinStock, @MaxStock";
+                dataGridViewName.DataSource = DataProvider.Instance.ExecuteQuery(script, new object[] { categoryId, minStock, maxStock });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi tải dữ liệu sản phẩm theo danh mục và khoảng tồn: " + ex.Message);
             }
         }
 
         #endregion
 
-        #region PRIVATE METHODS
+        #region COMBOBOX METHODS
 
-        private List<Product> ConvertDataTableToList(DataTable dt)
+        public void FillProductComboBox(string script, ComboBox DropDownName)
         {
-            List<Product> products = new List<Product>();
-            foreach (DataRow row in dt.Rows)
+            DataTable dt = new DataTable();
+
+            try
             {
-                products.Add(new Product(row));
+                dt = DataProvider.Instance.ExecuteQuery(script);
+                DropDownName.DataSource = dt;
+                DropDownName.ValueMember = dt.Columns[0].ColumnName;
+                DropDownName.DisplayMember = dt.Columns[1].ColumnName;
             }
-            return products;
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi đổ dữ liệu vào combobox: " + ex.Message);
+            }
         }
 
+
+        public bool HasProducts()
+        {
+            try
+            {
+                script = @"SELECT COUNT(*) FROM SanPham WHERE TrangThai = 1";
+                int count = Convert.ToInt32(DataProvider.Instance.ExecuteScalar(script));
+                return count > 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi kiểm tra sản phẩm: " + ex.Message);
+                return false;
+            }
+        }
         #endregion
     }
 }

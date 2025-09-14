@@ -64,9 +64,20 @@ namespace CuaHangMayTinh.Models
         public object ReportData { get; set; }
 
         // Các thuộc tính hỗ trợ binding
-        public bool HasData => ReportData != null;
-        public string DateRange => $"{FromDate:dd/MM/yyyy} - {ToDate:dd/MM/yyyy}";
-        public string ReportTypeName => GetReportTypeName();
+        public bool HasData
+        {
+            get { return ReportData != null; }
+        }
+
+        public string DateRange
+        {
+            get { return $"{FromDate:dd/MM/yyyy} - {ToDate:dd/MM/yyyy}"; }
+        }
+
+        public string ReportTypeName
+        {
+            get { return GetReportTypeName(); }
+        }
 
         #endregion
 
@@ -114,24 +125,32 @@ namespace CuaHangMayTinh.Models
 
         private string GetReportTypeName()
         {
-            return ReportType switch
+            switch (ReportType)
             {
-                1 => "BÁO CÁO TỒN KHO",
-                2 => "BÁO CÁO SẢN PHẨM BÁN CHẠY",
-                3 => "BÁO CÁO DOANH THU",
-                _ => "BÁO CÁO"
-            };
+                case 1:
+                    return "BÁO CÁO TỒN KHO";
+                case 2:
+                    return "BÁO CÁO SẢN PHẨM BÁN CHẠY";
+                case 3:
+                    return "BÁO CÁO DOANH THU";
+                default:
+                    return "BÁO CÁO";
+            }
         }
 
         public string GetFilterSummary()
         {
-            return ReportType switch
+            switch (ReportType)
             {
-                1 => GetInventoryFilterSummary(),
-                2 => GetBestSellersFilterSummary(),
-                3 => GetRevenueFilterSummary(),
-                _ => "Không có bộ lọc"
-            };
+                case 1:
+                    return GetInventoryFilterSummary();
+                case 2:
+                    return GetBestSellersFilterSummary();
+                case 3:
+                    return GetRevenueFilterSummary();
+                default:
+                    return "Không có bộ lọc";
+            }
         }
 
         private string GetInventoryFilterSummary()
@@ -147,12 +166,22 @@ namespace CuaHangMayTinh.Models
             if (MaxStock.HasValue && MaxStock < int.MaxValue)
                 filters.Add($"Tồn tối đa: {MaxStock}");
 
-            return filters.Count > 0 ? string.Join(" | ", filters) : "Tất cả sản phẩm";
+            if (filters.Count > 0)
+                return string.Join(" | ", filters);
+            else
+                return "Tất cả sản phẩm";
         }
 
         private string GetBestSellersFilterSummary()
         {
-            return $"Top {TopCount} theo {(SortBy == "Quantity" ? "số lượng" : "doanh thu")}";
+            if (SortBy == "Quantity")
+            {
+                return $"Top {TopCount} theo số lượng";
+            }
+            else
+            {
+                return $"Top {TopCount} theo doanh thu";
+            }
         }
 
         private string GetRevenueFilterSummary()
@@ -172,14 +201,19 @@ namespace CuaHangMayTinh.Models
 
         private string GetGroupByName()
         {
-            return GroupBy switch
+            switch (GroupBy)
             {
-                "Day" => "Ngày",
-                "Month" => "Tháng",
-                "Quarter" => "Quý",
-                "Year" => "Năm",
-                _ => GroupBy
-            };
+                case "Day":
+                    return "Ngày";
+                case "Month":
+                    return "Tháng";
+                case "Quarter":
+                    return "Quý";
+                case "Year":
+                    return "Năm";
+                default:
+                    return GroupBy;
+            }
         }
 
         #endregion
@@ -201,9 +235,20 @@ namespace CuaHangMayTinh.Models
         public string TrangThaiTonKho { get; set; }
 
         // Format properties for display
-        public string GiaBanFormatted => GiaBan.ToString("N0") + " đ";
-        public string GiaNhapFormatted => GiaNhap.ToString("N0") + " đ";
-        public string TongGiaTriFormatted => TongGiaTriTonKho.ToString("N0") + " đ";
+        public string GiaBanFormatted
+        {
+            get { return GiaBan.ToString("N0") + " đ"; }
+        }
+
+        public string GiaNhapFormatted
+        {
+            get { return GiaNhap.ToString("N0") + " đ"; }
+        }
+
+        public string TongGiaTriFormatted
+        {
+            get { return TongGiaTriTonKho.ToString("N0") + " đ"; }
+        }
     }
 
     /// <summary>
@@ -220,9 +265,24 @@ namespace CuaHangMayTinh.Models
         public int SoDonHang { get; set; }
 
         // Format properties for display
-        public string TongDoanhThuFormatted => TongDoanhThu.ToString("N0") + " đ";
-        public string DonGiaTrungBinhFormatted => DonGiaTrungBinh.ToString("N0") + " đ";
-        public string DoanhThuTrungBinhFormatted => (TongDoanhThu / (SoDonHang == 0 ? 1 : SoDonHang)).ToString("N0") + " đ";
+        public string TongDoanhThuFormatted
+        {
+            get { return TongDoanhThu.ToString("N0") + " đ"; }
+        }
+
+        public string DonGiaTrungBinhFormatted
+        {
+            get { return DonGiaTrungBinh.ToString("N0") + " đ"; }
+        }
+
+        public string DoanhThuTrungBinhFormatted
+        {
+            get
+            {
+                decimal avgRevenue = SoDonHang == 0 ? 0 : TongDoanhThu / SoDonHang;
+                return avgRevenue.ToString("N0") + " đ";
+            }
+        }
     }
 
     /// <summary>
@@ -239,8 +299,19 @@ namespace CuaHangMayTinh.Models
         public int SoKhachHang { get; set; }
 
         // Format properties for display
-        public string TongDoanhThuFormatted => TongDoanhThu.ToString("N0") + " đ";
-        public string TongThanhToanFormatted => TongThanhToan.ToString("N0") + " đ";
-        public string TrungBinhHoaDonFormatted => TrungBinhHoaDon.ToString("N0") + " đ";
+        public string TongDoanhThuFormatted
+        {
+            get { return TongDoanhThu.ToString("N0") + " đ"; }
+        }
+
+        public string TongThanhToanFormatted
+        {
+            get { return TongThanhToan.ToString("N0") + " đ"; }
+        }
+
+        public string TrungBinhHoaDonFormatted
+        {
+            get { return TrungBinhHoaDon.ToString("N0") + " đ"; }
+        }
     }
 }

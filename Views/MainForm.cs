@@ -25,41 +25,14 @@ namespace ComputerStoreManagement
 
         }
 
-        private void formToolStripMenuItem_DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-            Form form = new Form();
-            switch (e.ClickedItem.Name)
-            {
-                case "FormTest":
-                    FormTest F_Test = new FormTest();
-                    form = F_Test;
-                    break;
-                case "Customer":
-                    frmCustomerManagement F_CusManage = new frmCustomerManagement();
-                    form = F_CusManage;
-                    break;
-                case "FormTestSanPham":
-                    FormTestSanPham F_TestSP = new FormTestSanPham();
-                    form = F_TestSP;
-                    break;
-                default:
-                    break;
-            }
-            form.MdiParent = this;
-            form.WindowState = FormWindowState.Maximized;
-            form.Show();
-            form.BringToFront();
-        }
+       
 
         private void Management_DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
             Form form = new Form();
             switch (e.ClickedItem.Name)
             {
-                case "Product":
-                    FormTestSanPham F_Test = new FormTestSanPham();
-                    form = F_Test;
-                    break;
+                
                 case "Customer":
                     frmCustomerManagement F_CustomerManagement = new frmCustomerManagement();
                     form = F_CustomerManagement;
