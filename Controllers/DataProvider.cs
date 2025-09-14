@@ -31,7 +31,7 @@ namespace CuaHangMayTinh.Controllers
 
         private DataProvider() { }
 
-        private string connectionString = @"Data Source=TIENLV;Initial Catalog=CuaHangMayTinh;Integrated Security=True;Encrypt=True;TrustServerCertificate=True";
+        private string connectionString = @"Data Source=omitako;Initial Catalog=CuaHangMayTinh;Integrated Security=True;Encrypt=True;TrustServerCertificate=True";
 
 
 
