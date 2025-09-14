@@ -30,7 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             this.errorProvider = new System.Windows.Forms.ErrorProvider(this.components);
-            this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.label1 = new System.Windows.Forms.Label();
             this.cbReportType = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -38,8 +37,6 @@
             this.label3 = new System.Windows.Forms.Label();
             this.dtpToDate = new System.Windows.Forms.DateTimePicker();
             this.label4 = new System.Windows.Forms.Label();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.lblRecordCount = new System.Windows.Forms.ToolStripStatusLabel();
             this.xemLịchSửBánToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.xemChiTiếtSảnPhẩmToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -54,7 +51,6 @@
             this.grbFilter = new System.Windows.Forms.GroupBox();
             this.labelChart = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
-            this.statusStrip1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudTopCount)).BeginInit();
             this.grbBestSellersList.SuspendLayout();
@@ -67,12 +63,6 @@
             // errorProvider
             // 
             this.errorProvider.ContainerControl = this;
-            // 
-            // lblStatus
-            // 
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(113, 19);
-            this.lblStatus.Text = "Trạng thái: Sẵn sàng";
             // 
             // label1
             // 
@@ -143,24 +133,6 @@
             this.label4.TabIndex = 6;
             this.label4.Text = "Top sản phẩm:";
             // 
-            // statusStrip1
-            // 
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.lblStatus,
-            this.lblRecordCount});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 426);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(800, 24);
-            this.statusStrip1.TabIndex = 8;
-            this.statusStrip1.Text = "statusStrip1";
-            // 
-            // lblRecordCount
-            // 
-            this.lblRecordCount.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
-            this.lblRecordCount.Name = "lblRecordCount";
-            this.lblRecordCount.Size = new System.Drawing.Size(109, 19);
-            this.lblRecordCount.Text = "Tổng số: 0 bản ghi";
-            // 
             // xemLịchSửBánToolStripMenuItem
             // 
             this.xemLịchSửBánToolStripMenuItem.Name = "xemLịchSửBánToolStripMenuItem";
@@ -191,7 +163,7 @@
             0,
             0});
             this.nudTopCount.Name = "nudTopCount";
-            this.nudTopCount.Size = new System.Drawing.Size(88, 20);
+            this.nudTopCount.Size = new System.Drawing.Size(322, 20);
             this.nudTopCount.TabIndex = 7;
             this.nudTopCount.Value = new decimal(new int[] {
             10,
@@ -205,7 +177,7 @@
             this.grbBestSellersList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.grbBestSellersList.Location = new System.Drawing.Point(0, 280);
             this.grbBestSellersList.Name = "grbBestSellersList";
-            this.grbBestSellersList.Size = new System.Drawing.Size(800, 170);
+            this.grbBestSellersList.Size = new System.Drawing.Size(1034, 231);
             this.grbBestSellersList.TabIndex = 7;
             this.grbBestSellersList.TabStop = false;
             this.grbBestSellersList.Text = "Danh sách sản phẩm bán chạy";
@@ -219,7 +191,7 @@
             this.dgvBestSellers.Location = new System.Drawing.Point(3, 16);
             this.dgvBestSellers.Name = "dgvBestSellers";
             this.dgvBestSellers.ReadOnly = true;
-            this.dgvBestSellers.Size = new System.Drawing.Size(794, 151);
+            this.dgvBestSellers.Size = new System.Drawing.Size(1028, 212);
             this.dgvBestSellers.TabIndex = 3;
             // 
             // btnViewReport
@@ -239,7 +211,7 @@
             this.grbChart.Dock = System.Windows.Forms.DockStyle.Top;
             this.grbChart.Location = new System.Drawing.Point(0, 80);
             this.grbChart.Name = "grbChart";
-            this.grbChart.Size = new System.Drawing.Size(800, 200);
+            this.grbChart.Size = new System.Drawing.Size(1034, 200);
             this.grbChart.TabIndex = 5;
             this.grbChart.TabStop = false;
             this.grbChart.Text = "Biểu đồ doanh thu";
@@ -249,7 +221,7 @@
             this.panelChart.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelChart.Location = new System.Drawing.Point(3, 16);
             this.panelChart.Name = "panelChart";
-            this.panelChart.Size = new System.Drawing.Size(794, 181);
+            this.panelChart.Size = new System.Drawing.Size(1028, 181);
             this.panelChart.TabIndex = 0;
             // 
             // btnExport
@@ -290,7 +262,7 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(794, 61);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1028, 61);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // grbFilter
@@ -299,7 +271,7 @@
             this.grbFilter.Dock = System.Windows.Forms.DockStyle.Top;
             this.grbFilter.Location = new System.Drawing.Point(0, 0);
             this.grbFilter.Name = "grbFilter";
-            this.grbFilter.Size = new System.Drawing.Size(800, 80);
+            this.grbFilter.Size = new System.Drawing.Size(1034, 80);
             this.grbFilter.TabIndex = 4;
             this.grbFilter.TabStop = false;
             this.grbFilter.Text = "Bộ lọc báo cáo";
@@ -309,7 +281,7 @@
             this.labelChart.Dock = System.Windows.Forms.DockStyle.Fill;
             this.labelChart.Location = new System.Drawing.Point(0, 0);
             this.labelChart.Name = "labelChart";
-            this.labelChart.Size = new System.Drawing.Size(800, 450);
+            this.labelChart.Size = new System.Drawing.Size(1034, 511);
             this.labelChart.TabIndex = 6;
             this.labelChart.Text = "Biểu đồ sẽ được hiển thị ở đây";
             this.labelChart.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -319,8 +291,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.statusStrip1);
+            this.ClientSize = new System.Drawing.Size(1034, 511);
             this.Controls.Add(this.grbBestSellersList);
             this.Controls.Add(this.grbChart);
             this.Controls.Add(this.grbFilter);
@@ -329,8 +300,6 @@
             this.Text = "frmBestSellersReport";
             this.Load += new System.EventHandler(this.frmBestSellersReport_Load);
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).EndInit();
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
             this.contextMenuStrip1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.nudTopCount)).EndInit();
             this.grbBestSellersList.ResumeLayout(false);
@@ -340,16 +309,12 @@
             this.tableLayoutPanel1.PerformLayout();
             this.grbFilter.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
         private System.Windows.Forms.ErrorProvider errorProvider;
-        private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.ToolStripStatusLabel lblStatus;
-        private System.Windows.Forms.ToolStripStatusLabel lblRecordCount;
         private System.Windows.Forms.GroupBox grbBestSellersList;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem xemChiTiếtSảnPhẩmToolStripMenuItem;

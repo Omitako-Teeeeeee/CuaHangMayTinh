@@ -30,9 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             this.errorProvider = new System.Windows.Forms.ErrorProvider(this.components);
-            this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.lblRecordCount = new System.Windows.Forms.ToolStripStatusLabel();
             this.cậpNhậtSốLượngToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.xemChiTiếtSảnPhẩmToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -63,7 +60,6 @@
             this.grbFilter = new System.Windows.Forms.GroupBox();
             this.danhMucTableAdapter = new CuaHangMayTinh.CuaHangMayTinhDataSetTableAdapters.DanhMucTableAdapter();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
-            this.statusStrip1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.grbInventoryList.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewProduct)).BeginInit();
@@ -79,30 +75,6 @@
             // errorProvider
             // 
             this.errorProvider.ContainerControl = this;
-            // 
-            // lblStatus
-            // 
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(113, 19);
-            this.lblStatus.Text = "Trạng thái: Sẵn sàng";
-            // 
-            // statusStrip1
-            // 
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.lblStatus,
-            this.lblRecordCount});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 426);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(800, 24);
-            this.statusStrip1.TabIndex = 7;
-            this.statusStrip1.Text = "statusStrip1";
-            // 
-            // lblRecordCount
-            // 
-            this.lblRecordCount.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
-            this.lblRecordCount.Name = "lblRecordCount";
-            this.lblRecordCount.Size = new System.Drawing.Size(109, 19);
-            this.lblRecordCount.Text = "Tổng số: 0 bản ghi";
             // 
             // cậpNhậtSốLượngToolStripMenuItem
             // 
@@ -417,7 +389,6 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.grbInventoryList);
             this.Controls.Add(this.grbSummary);
             this.Controls.Add(this.grbFilter);
@@ -425,8 +396,6 @@
             this.Text = "frmInventoryReport";
             this.Load += new System.EventHandler(this.frmInventoryReport_Load);
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).EndInit();
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
             this.contextMenuStrip1.ResumeLayout(false);
             this.grbInventoryList.ResumeLayout(false);
             this.grbInventoryList.PerformLayout();
@@ -441,16 +410,12 @@
             this.tableLayoutPanel1.PerformLayout();
             this.grbFilter.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
         private System.Windows.Forms.ErrorProvider errorProvider;
-        private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.ToolStripStatusLabel lblStatus;
-        private System.Windows.Forms.ToolStripStatusLabel lblRecordCount;
         private System.Windows.Forms.GroupBox grbInventoryList;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem xemChiTiếtSảnPhẩmToolStripMenuItem;

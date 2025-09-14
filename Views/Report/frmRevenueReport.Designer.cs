@@ -32,8 +32,6 @@
             this.errorProvider = new System.Windows.Forms.ErrorProvider(this.components);
             this.grbDetails = new System.Windows.Forms.GroupBox();
             this.dgvRevenueDetails = new System.Windows.Forms.DataGridView();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblAverageInvoice = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.lblTotalRevenue = new System.Windows.Forms.Label();
@@ -58,7 +56,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
             this.grbDetails.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvRevenueDetails)).BeginInit();
-            this.statusStrip1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.grbSummary.SuspendLayout();
             this.panelChart.SuspendLayout();
@@ -77,7 +74,7 @@
             this.grbDetails.Dock = System.Windows.Forms.DockStyle.Fill;
             this.grbDetails.Location = new System.Drawing.Point(0, 360);
             this.grbDetails.Name = "grbDetails";
-            this.grbDetails.Size = new System.Drawing.Size(800, 68);
+            this.grbDetails.Size = new System.Drawing.Size(800, 90);
             this.grbDetails.TabIndex = 8;
             this.grbDetails.TabStop = false;
             this.grbDetails.Text = "Chi tiết doanh thu";
@@ -91,24 +88,8 @@
             this.dgvRevenueDetails.Location = new System.Drawing.Point(3, 16);
             this.dgvRevenueDetails.Name = "dgvRevenueDetails";
             this.dgvRevenueDetails.ReadOnly = true;
-            this.dgvRevenueDetails.Size = new System.Drawing.Size(794, 49);
+            this.dgvRevenueDetails.Size = new System.Drawing.Size(794, 71);
             this.dgvRevenueDetails.TabIndex = 3;
-            // 
-            // statusStrip1
-            // 
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.lblStatus});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 428);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(800, 22);
-            this.statusStrip1.TabIndex = 9;
-            this.statusStrip1.Text = "statusStrip1";
-            // 
-            // lblStatus
-            // 
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(113, 17);
-            this.lblStatus.Text = "Trạng thái: Sẵn sàng";
             // 
             // lblAverageInvoice
             // 
@@ -372,7 +353,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.grbDetails);
-            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.grbSummary);
             this.Controls.Add(this.grbChart);
             this.Controls.Add(this.grbFilter);
@@ -382,8 +362,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).EndInit();
             this.grbDetails.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvRevenueDetails)).EndInit();
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
             this.grbSummary.ResumeLayout(false);
@@ -393,7 +371,6 @@
             this.tableLayoutPanel1.PerformLayout();
             this.grbFilter.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -401,8 +378,6 @@
 
         private System.Windows.Forms.ErrorProvider errorProvider;
         private System.Windows.Forms.GroupBox grbDetails;
-        private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.ToolStripStatusLabel lblStatus;
         private System.Windows.Forms.GroupBox grbSummary;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.Label label4;
